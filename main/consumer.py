@@ -20,3 +20,5 @@ print('Started Consuming')
 channel.start_consuming()  # Keeps the consumer running
 
 channel.close()  # Closes the connection
+
+# checking
