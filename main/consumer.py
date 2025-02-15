@@ -1,7 +1,8 @@
-#amqps://yrhxzdbw:8Y9GmUDjgzTe6LEUCDuhx_516VWOrYRd@rattlesnake.rmq.cloudamqp.com/yrhxzdbw
+import os
 import pika
 
-params = pika.URLParameters('amqps://yrhxzdbw:8Y9GmUDjgzTe6LEUCDuhx_516VWOrYRd@rattlesnake.rmq.cloudamqp.com/yrhxzdbw')
+CLOUDAMQP_URL = os.getenv('CLOUDAMQP_URL')
+params = pika.URLParameters(CLOUDAMQP_URL)
 
 connection = pika.BlockingConnection(params)
 
