@@ -12,8 +12,6 @@ load_dotenv()
 username = os.getenv('POSTGRES_USER')
 password = os.getenv('POSTGRES_PASSWORD')
 
-print("username:", username, " password:", password)
-
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
