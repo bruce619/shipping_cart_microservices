@@ -57,4 +57,4 @@ class UserAPIView(APIView):
     def get(self, request, format=None): # /api/v1/users
         users = User.objects.all()
         user = random.choice(users)
-        return Response({'id': f"Successfully deleted {user.id}"})
+        return Response({'id': user.id})
