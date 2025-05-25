@@ -1,27 +1,19 @@
 import React from 'react';
 import './App.css';
-import Nav from './components/Nav';
-import Menu from './components/Menu';
-import Products from './admin/Products';
 import Main from './main/Main';
 import { BrowserRouter, Routes, Route} from 'react-router-dom';
+import ProductsCreate from './admin/ProductsCreate';
+import Products from './admin/Products';
+import ProductsEdit from './admin/ProductsEdit';
+
 
 function App() {
   return (
     <div className="App">
-          {/* Navbar Component */}
-          <Nav />
+          
+                
 
-          {/* Main Layout */}
-          <div className="container-fluid">
-            <div className="row">
-              {/* Sidebar */}
-              <Menu />
-
-              {/* Main Content */}
-              <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <h2>Dashboard</h2>
-
+              {/*}
                 <div className="row">
                   <div className="col-md-4">
                     <div className="card">
@@ -31,20 +23,19 @@ function App() {
                       </div>
                     </div>
                   </div>
-                  {/* More cards */}
+                  
                 </div>
+                */}
 
                 <BrowserRouter>
                   <Routes>
                     <Route path="/"  Component={Main} />
                     <Route path="/admin/products" Component={Products} />
+                    <Route path="/admin/products/create" Component={ProductsCreate} />
+                    <Route path="/admin/products/:id/edit" Component={ProductsEdit} />
                   </Routes>
                 </BrowserRouter>
 
-
-              </main>
-            </div>
-          </div>
         </div>
       );
 }

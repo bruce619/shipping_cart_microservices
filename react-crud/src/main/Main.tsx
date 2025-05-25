@@ -1,37 +1,77 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useState } from "react";
+import { Product } from "../interface/products";
 
 const Main = () => {
+    const [products, setProducts] = useState([] as Product[]);
+
+    useEffect(() => {
+      (
+        async () => {
+          const response = await fetch('http://localhost:8001/api/v1/products');
+          if (!response.ok) {
+            console.error('Failed to fetch products');
+            return;
+          }
+          const data = await response.json();
+          console.log(data);
+          setProducts(data);
+        }
+      )();
+    }, [])
+
+    const like = async (id: number) => {
+
+      await fetch(`http://localhost:8001/api/v1/products/${id}/like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      setProducts(products.map(
+        (p: Product) => {
+          if (p.id === id) {
+            p.likes++; // Increment the likes count
+          }
+          return p;
+        }
+      ));
+
+    }
+
     return (
-      <div className="album py-5 bg-body-tertiary">
-        <div className="container">
-          {/* Header */}
-          <div className="pb-4">
-            <h1 className="display-5 fw-bold">Album Example</h1>
-            <p className="col-lg-8 fs-4">A simple photo gallery showcasing images in a responsive grid.</p>
-            <button className="btn btn-primary btn-lg" type="button">View More</button>
-          </div>
-          {/* Card Grid */}
-          <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-            {[...Array(6)].map((_, index) => (
-              <div className="col" key={index}>
-                <div className="card shadow-sm">
-                  <img src={`https://via.placeholder.com/400x300?text=Image+${index + 1}`} className="bd-placeholder-img card-img-top" width="100%" height="225" alt={`Image ${index + 1}`} />
-                  <div className="card-body">
-                    <h5 className="card-title">Image {index + 1}</h5>
-                    <p className="card-text">This is a sample description for image {index + 1} in the album.</p>
-                    <div className="d-flex justify-content-between align-items-center">
-                      <div className="btn-group">
-                        <button type="button" className="btn btn-sm btn-outline-secondary">View</button>
-                      </div>
-                    </div>
+        <main role="main">
+            <div className="album py-5 bg-light">
+                <div className="container">
+                  <div className="row">
+                    {products.map(
+                      (p: Product) => {
+                        return (
+                          <div className="col-md-4" key={p.id}>
+                            <div className="card mb-4 shadow-sm">
+                              <img src={p.image} height="180" />
+                              <div className="card-body">
+                                <p className="card-text">{p.title}</p>
+                                <div className="d-flex justify-content-between align-items-center">
+                                  <div className="btn-group">
+                                    <button type="button" className="btn btn-sm btn-outline-secondary"
+                                      onClick={() => like(p.id)}
+                                    >Like</button>
+                                  </div>
+                                  <small className="text-muted">{p.likes} likes</small>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      }
+                    )}
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
+        </main>
     );
-  }
+  };
 
 export default Main;
