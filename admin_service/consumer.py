@@ -16,6 +16,8 @@ from products.models import Product
 
 # Connects to RabbitMQ server (CloudAMQP)
 params = pika.URLParameters("amqps://yrhxzdbw:8Y9GmUDjgzTe6LEUCDuhx_516VWOrYRd@rattlesnake.rmq.cloudamqp.com/yrhxzdbw")
+params.heartbeat = 600 #seconds
+params.blocked_connection_timeout = 300 #seconds
 connection = pika.BlockingConnection(params)
 channel = connection.channel()
 # creates the 'admin' queue (if it doesn't exist)
@@ -34,10 +36,8 @@ def callback(ch, method, properties, body):
         print(f"Error processing message: {e}")
 
 channel.basic_consume(queue='admin', on_message_callback=callback, auto_ack=True)  # Consumes messages from 'admin'
-print('Started Consuming')
 
-try:
-    channel.start_consuming()
-finally:
-    channel.close()
-    connection.close()
+
+print('Started Consuming')
+channel.start_consuming()
+channel.close()
