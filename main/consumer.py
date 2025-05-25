@@ -6,6 +6,8 @@ from main import Product, db, app
 load_dotenv()
 
 params = pika.URLParameters("amqps://yrhxzdbw:8Y9GmUDjgzTe6LEUCDuhx_516VWOrYRd@rattlesnake.rmq.cloudamqp.com/yrhxzdbw")
+params.heartbeat = 600 #seconds
+params.blocked_connection_timeout = 300 #seconds
 connection = pika.BlockingConnection(params)
 channel = connection.channel()
 # creates the 'main' queue (if it doesn't exist)
@@ -19,7 +21,7 @@ def callback(ch, method, properties, body):
 
         with app.app_context():
             if properties.content_type == 'product_created':
-                product = Product(id=data['id'], title=data['title'], image=data['image'])
+                product = Product(id=data['id'], title=data['title'], image=data['image'], likes=data['likes'])
                 db.session.add(product)
                 db.session.commit()
                 print('Product Created')
@@ -28,6 +30,7 @@ def callback(ch, method, properties, body):
                 product = Product.query.get(data['id'])
                 product.title = data['title']
                 product.image = data['image']
+                product.likes = data['likes']
                 db.session.commit()
                 print('Product Updated')
 
@@ -38,6 +41,8 @@ def callback(ch, method, properties, body):
                     product.title = data['title']
                 if data.get('image'):
                     product.image = data['image']
+                if data.get('likes'):
+                    product.likes = data['likes']
                 db.session.commit()
                 print('Product Updated Partial')
 
@@ -51,10 +56,7 @@ def callback(ch, method, properties, body):
         print(f"Error processing message: {e}")
 
 channel.basic_consume(queue='main', on_message_callback=callback, auto_ack=True)  # Consumes messages from 'main'
-print('Started Consuming')
 
-try:
-    channel.start_consuming()
-finally:
-    channel.close()
-    connection.close()
+print('Started Consuming')
+channel.start_consuming()
+channel.close()

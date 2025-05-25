@@ -22,7 +22,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f"postgresql://{username}:{password}@db:
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-CORS(app)
+CORS(app, origins=["http://localhost:3000", "http://localhost:8000", "http://host.docker.internal:8000"])
 
 @dataclass
 class Product(db.Model):
@@ -30,9 +30,11 @@ class Product(db.Model):
     id: int
     title: str
     image: str
+    likes: int
     id = db.Column(db.Integer, primary_key=True, autoincrement=False)
     title = db.Column(db.String(200))
     image = db.Column(db.String(200))
+    likes = db.Column(db.Integer)
 
 @dataclass
 class ProductUser(db.Model):
@@ -63,14 +65,26 @@ def like(id):
     try:
         product_user = ProductUser(product_id=id, user_id=response_json['id'])
         db.session.add(product_user)
+
+        # Increment the like count in the Product table
+        product = Product.query.get(id)
+        if product is None:
+            db.session.rollback()
+            return jsonify({"error": "Product not found"}), 404
+
+        product.likes = product.likes + 1 if product.likes else 1
+
         db.session.commit()
 
-        # publish to RabbitMQ
+        # Publish to RabbitMQ
         publish('product_liked', id)
 
     except exc.IntegrityError:
         db.session.rollback()
         return jsonify({"error": "You already liked this product"}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"An error occurred: {e}"}), 500
 
     return  jsonify({
         'message': 'Success',
